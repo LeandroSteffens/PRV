@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 class Grafo:
     def __init__(self):
@@ -9,45 +10,122 @@ class Grafo:
         if vertice not in self.vertices:
             self.vertices[vertice] = []
     
-    def adicionar_aresta(self, origem, destino):
+    def adicionar_aresta(self, origem, destino, valor):
         if origem in self.vertices and destino in self.vertices:
             if (origem, destino) not in self.arestas and (destino, origem) not in self.arestas:
-                valor = random.randint(1, 100)  # Valor aleatório de 1 a 100
                 self.arestas[(origem, destino)] = valor
                 self.vertices[origem].append((destino, valor))
                 self.vertices[destino].append((origem, valor))
     
-    def imprimir_grafo(self):
-        for vertice in self.vertices:
-            arestas = [f"{aresta[0]} ({aresta[1]})" for aresta in self.vertices[vertice]]
-            print(f"{vertice}: {', '.join(arestas)}")
+    def imprimir_capitais_disponiveis(self, estado_atual):
+        print(f"Você está em: {estado_atual}")
+        print("Capitais disponíveis para ir:")
+        for vizinho, _ in self.vertices.items():
+            if vizinho != estado_atual:
+                print(vizinho)
+    
+    def conectar_capitais(self):
+        # Distâncias aproximadas em quilômetros entre as capitais
+        distancias = {
+            ("Rio Branco", "Porto Velho"): 742,
+            ("Rio Branco", "Manaus"): 873,
+            ("Porto Velho", "Manaus"): 934,
+            ("Manaus", "Boa Vista"): 785,
+            ("Boa Vista", "Macapa"): 1075,
+            ("Macapa", "Belem"): 350,
+            ("Macapa", "Sao Luis"): 1100,
+            ("Sao Luis", "Belem"): 720,
+            ("Belem", "Fortaleza"): 1660,
+            ("Fortaleza", "Natal"): 510,
+            ("Natal", "Joao Pessoa"): 180,
+            ("Joao Pessoa", "Recife"): 120,
+            ("Recife", "Maceio"): 260,
+            ("Maceio", "Aracaju"): 210,
+            ("Aracaju", "Salvador"): 330,
+            ("Salvador", "Vitoria"): 1160,
+            ("Vitoria", "Rio de Janeiro"): 520,
+            ("Vitoria", "Belo Horizonte"): 520,
+            ("Belo Horizonte", "Sao Paulo"): 586,
+            ("Belo Horizonte", "Brasilia"): 716,
+            ("Brasilia", "Goiania"): 173,
+            ("Brasilia", "Cuiaba"): 1083,
+            ("Cuiaba", "Campo Grande"): 710,
+            ("Campo Grande", "Sao Paulo"): 1016,
+            ("Campo Grande", "Curitiba"): 1086,
+            ("Curitiba", "Florianopolis"): 300,
+            ("Curitiba", "Porto Alegre"): 461,
+            ("Porto Alegre", "Florianopolis"): 476,
+            ("Sao Paulo", "Rio de Janeiro"): 430,
+            ("Sao Paulo", "Belo Horizonte"): 586,
+            ("Sao Paulo", "Brasilia"): 873,
+            ("Sao Paulo", "Curitiba"): 408,
+            ("Rio de Janeiro", "Vitoria"): 520,
+            ("Rio de Janeiro", "Belo Horizonte"): 434
+        }
+        
+        for origem, destino in distancias:
+            self.adicionar_aresta(origem, destino, distancias[(origem, destino)])
+
+    def tem_caminho(self, origem, destino):
+        visitados = set()
+        fila = deque([origem])
+        while fila:
+            vertice_atual = fila.popleft()
+            if vertice_atual == destino:
+                return True
+            if vertice_atual in visitados:
+                continue
+            visitados.add(vertice_atual)
+            for vizinho, _ in self.vertices[vertice_atual]:
+                if vizinho not in visitados:
+                    fila.append(vizinho)
+        return False
+
+    def encontrar_caminho(self, origem, destino):
+        visitados = set()
+        fila = deque([(origem, [origem], 0)])  # (vertice, caminho, distancia)
+        while fila:
+            vertice_atual, caminho_atual, distancia_atual = fila.popleft()
+            if vertice_atual == destino:
+                return caminho_atual, distancia_atual
+            if vertice_atual in visitados:
+                continue
+            visitados.add(vertice_atual)
+            for vizinho, valor_aresta in self.vertices[vertice_atual]:
+                if vizinho not in visitados:
+                    novo_caminho = caminho_atual + [vizinho]
+                    nova_distancia = distancia_atual + valor_aresta
+                    fila.append((vizinho, novo_caminho, nova_distancia))
+        return None, float('inf')  # Não há caminho
 
 # Criando o grafo
 grafo = Grafo()
 
 # Adicionando os vértices (capitais)
-capitais = ["Rio Branco", "Maceió", "Macapá", "Manaus", "Salvador", "Fortaleza", "Brasília", "Vitória", "Goiânia",
-            "São Luís", "Cuiabá", "Campo Grande", "Belo Horizonte", "Belém", "João Pessoa", "Curitiba", "Recife",
-            "Teresina", "Rio de Janeiro", "Natal", "Porto Alegre", "Porto Velho", "Boa Vista", "Florianópolis",
-            "São Paulo", "Aracaju", "Palmas"]
+capitais = ["Rio Branco", "Maceio", "Macapa", "Manaus", "Salvador", "Fortaleza", "Brasilia", "Vitoria", "Goiania",
+            "Sao Luis", "Cuiaba", "Campo Grande", "Belo Horizonte", "Belem", "Joao Pessoa", "Curitiba", "Recife",
+            "Teresina", "Rio de Janeiro", "Natal", "Porto Alegre", "Porto Velho", "Boa Vista", "Florianopolis",
+            "Sao Paulo", "Aracaju", "Palmas"]
 
 for capital in capitais:
     grafo.adicionar_vertice(capital)
 
-# Adicionando as arestas (conexões entre as capitais)
-conexoes = [("Rio Branco", "Porto Velho"), ("Maceió", "Recife"), ("Macapá", "Belém"), ("Manaus", "Boa Vista"),
-            ("Manaus", "Porto Velho"), ("Salvador", "Aracaju"), ("Salvador", "Recife"), ("Fortaleza", "Teresina"),
-            ("Fortaleza", "Natal"), ("Fortaleza", "Recife"), ("Brasília", "Goiânia"), ("Brasília", "Cuiabá"),
-            ("Brasília", "Campo Grande"), ("Belo Horizonte", "Brasília"), ("Belo Horizonte", "São Paulo"),
-            ("Belo Horizonte", "Rio de Janeiro"), ("Belém", "São Luís"), ("João Pessoa", "Recife"),
-            ("João Pessoa", "Natal"), ("Curitiba", "São Paulo"), ("Curitiba", "Florianópolis"),
-            ("Recife", "Maceió"), ("Recife", "João Pessoa"), ("Teresina", "São Luís"), ("Teresina", "Fortaleza"),
-            ("Rio de Janeiro", "São Paulo"), ("Porto Alegre", "Florianópolis"), ("Porto Alegre", "Curitiba"),
-            ("Boa Vista", "Manaus"), ("Florianópolis", "Porto Alegre"), ("São Paulo", "Rio de Janeiro"),
-            ("São Paulo", "Belo Horizonte"), ("Aracaju", "Salvador"), ("Palmas", "Brasília")]
+# Conectando todas as capitais
+grafo.conectar_capitais()
 
-for conexao in conexoes:
-    grafo.adicionar_aresta(conexao[0], conexao[1])
+# Imprimindo a capital onde está e as capitais disponíveis para ir
+estado_inicial = random.choice(capitais)
+grafo.imprimir_capitais_disponiveis(estado_inicial)
 
-# Imprimindo o grafo
-grafo.imprimir_grafo()
+# Solicitando ao usuário o estado de destino
+print("\nDigite o nome da capital para onde deseja ir:")
+estado_final = input().strip()
+
+# Encontrando o caminho e calculando a distância percorrida
+caminho, distancia_percorrida = grafo.encontrar_caminho(estado_inicial, estado_final)
+if caminho:
+    print(f"\nMenor caminho de {estado_inicial} até {estado_final}:")
+    print(" -> ".join(caminho))
+    print(f"Distância percorrida: {distancia_percorrida} km")
+else:
+    print(f"\nNão há caminho de {estado_inicial} até {estado_final}")
