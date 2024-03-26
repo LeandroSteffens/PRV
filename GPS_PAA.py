@@ -1,68 +1,167 @@
 import random
 from collections import deque
 
+
 class Grafo:
     def __init__(self):
         self.vertices = {}
         self.arestas = {}
-    
+
     def adicionar_vertice(self, vertice):
         if vertice not in self.vertices:
             self.vertices[vertice] = []
-    
+
     def adicionar_aresta(self, origem, destino, valor):
         if origem in self.vertices and destino in self.vertices:
             if (origem, destino) not in self.arestas and (destino, origem) not in self.arestas:
                 self.arestas[(origem, destino)] = valor
                 self.vertices[origem].append((destino, valor))
                 self.vertices[destino].append((origem, valor))
-    
+
     def imprimir_capitais_disponiveis(self, estado_atual):
         print(f"Você está em: {estado_atual}")
         print("Capitais disponíveis para ir:")
         for vizinho, _ in self.vertices.items():
             if vizinho != estado_atual:
                 print(vizinho)
-    
+
     def conectar_capitais(self):
-        # Distâncias aproximadas em quilômetros entre as capitais
+        # Distâncias de condução em quilômetros entre as capitais, segundo br.distanciacidades.net
         distancias = {
-            ("Rio Branco", "Porto Velho"): 742,
-            ("Rio Branco", "Manaus"): 873,
-            ("Porto Velho", "Manaus"): 934,
-            ("Manaus", "Boa Vista"): 785,
-            ("Boa Vista", "Macapa"): 1075,
-            ("Macapa", "Belem"): 350,
-            ("Macapa", "Sao Luis"): 1100,
-            ("Sao Luis", "Belem"): 720,
-            ("Belem", "Fortaleza"): 1660,
-            ("Fortaleza", "Natal"): 510,
-            ("Natal", "Joao Pessoa"): 180,
-            ("Joao Pessoa", "Recife"): 120,
-            ("Recife", "Maceio"): 260,
-            ("Maceio", "Aracaju"): 210,
-            ("Aracaju", "Salvador"): 330,
-            ("Salvador", "Vitoria"): 1160,
-            ("Vitoria", "Rio de Janeiro"): 520,
-            ("Vitoria", "Belo Horizonte"): 520,
-            ("Belo Horizonte", "Sao Paulo"): 586,
-            ("Belo Horizonte", "Brasilia"): 716,
-            ("Brasilia", "Goiania"): 173,
-            ("Brasilia", "Cuiaba"): 1083,
-            ("Cuiaba", "Campo Grande"): 710,
-            ("Campo Grande", "Sao Paulo"): 1016,
-            ("Campo Grande", "Curitiba"): 1086,
-            ("Curitiba", "Florianopolis"): 300,
-            ("Curitiba", "Porto Alegre"): 461,
-            ("Porto Alegre", "Florianopolis"): 476,
-            ("Sao Paulo", "Rio de Janeiro"): 430,
-            ("Sao Paulo", "Belo Horizonte"): 586,
-            ("Sao Paulo", "Brasilia"): 873,
-            ("Sao Paulo", "Curitiba"): 408,
-            ("Rio de Janeiro", "Vitoria"): 520,
-            ("Rio de Janeiro", "Belo Horizonte"): 434
+            # Regiao norte
+                # Roraima
+            ("Boa Vista", "Manaus"): 781,
+            ("Boa Vista", "Belem"): 4133,
+                # Amapá
+            ("Macapa", "Belem"): 539,
+                # Amazonas
+            ("Manaus", "Boa Vista"): 781,
+            ("Manaus", "Belem"): 3073,
+            ("Manaus", "Rio Branco"): 1415,
+            ("Manaus", "Porto Velho"): 901,
+            ("Manaus", "Cuiaba"): 2356,
+                # Pará
+            ("Belem", "Macapa"): 539,
+            ("Belem", "Boa Vista"): 4133,
+            ("Belem", "Manaus"): 3073,
+            ("Belem", "Cuiaba"): 2506,
+            ("Belem", "Palmas"): 1236,
+            ("Belem", "Sao Luis"): 579,
+                # Acre
+            ("Rio Branco", "Manaus"): 1415,
+            ("Rio Branco", "Porto Velho"): 515,
+                # Rondonia
+            ("Porto Velho", "Manaus"): 901,
+            ("Porto Velho", "Rio Branco"): 515,
+            ("Porto Velho", "Cuiaba"): 1457,
+                # Tocantins
+            ("Palmas", "Belem"): 1236,
+            ("Palmas", "Sao Luis"): 1270,
+            ("Palmas", "Teresina"): 1127,
+            ("Palmas", "Salvador"): 1437,
+            ("Palmas", "Brasilia"): 298,
+            ("Palmas", "Cuiaba"): 1498,
+
+            # Regiao nordeste
+                # Maranhao
+            ("Sao Luis", "Belem"): ,
+            ("Sao Luis", "Palmas"):,
+            ("Sao Luis", "Teresina"):,
+                # Ceara
+            ("Fortaleza", "Natal"): ,
+            ("Fortaleza", "Teresina"):,
+                # Rio Grande do Norte
+            ("Natal", "Fortaleza"): ,
+            ("Natal", "Joao Pessoa"): ,
+                # Paraiba
+            ("Joao Pessoa", "Natal"): ,
+            ("Joao Pessoa", "Recife"): ,
+                # Piaui
+            ("Teresina", "Sao Luis"): ,
+            ("Teresina", "Fortaleza"):,
+            ("Teresina", "Recife"):,
+            ("Teresina", "Salvador"):,
+            ("Teresina", "Palmas"):,
+                # Pernambuco
+            ("Recife", "Joao Pessoa"): ,
+            ("Recife", "Teresina"):,
+            ("Recife", "Maceio"):,
+                # Alagoas
+            ("Maceio", "Recife"): ,
+            ("Maceio", "Aracaju"):,
+                # Sergipe
+            ("Aracaju", "Maceio"):,
+            ("Aracaju", "Salvador"):,
+                # Bahia
+            ("Salvador", "Aracaju"): ,
+            ("Salvador", "Teresina"):,
+            ("Salvador", "Palmas"):,
+            ("Salvador", "Brasilia"):,
+            ("Salvador", "Belo Horizonte"):,
+            ("Salvador", "Vitoria"):,
+
+            # Regiao centro-oeste
+                # Mato Grosso
+            ("Cuiaba", "Porto Velho"): ,
+            ("Cuiaba", "Manaus"):,
+            ("Cuiaba", "Belem"):,
+            ("Cuiaba", "Palmas"):,
+            ("Cuiaba", "Brasilia"):,
+            ("Cuiaba", "Goiania"):,
+            ("Cuiaba", "Campo Grande"):,
+                # Goias
+            ("Goiania", "Cuiaba"):,
+            ("Goiania", "Brasilia"):,
+            ("Goiania", "Belo Horizonte"):,
+            ("Goiania", "Campo Grande"):,
+                # Mato Grosso do Sul
+            ("Campo Grande", "Cuiaba"): ,
+            ("Campo Grande", "Goiania"):,
+            ("Campo Grande", "Belo Horizonte"):,
+            ("Campo Grande", "Sao Paulo"):,
+            ("Campo Grande", "Curitiba"):,
+                # Distrito Federal
+            ("Brasilia", "Palmas"): ,
+            ("Brasilia", "Salvador"):,
+            ("Brasilia", "Belo Horizonte"):,
+            ("Brasilia", "Goiania"):,
+            ("Brasilia", "Cuiaba"):,
+
+            # Regiao sudeste
+                # Minas Gerais
+            ("Belo Horizonte", "Brasilia"):,
+            ("Belo Horizonte", "Salvador"):,
+            ("Belo Horizonte", "Vitoria"):,
+            ("Belo Horizonte", "Rio de Janeiro"):,
+            ("Belo Horizonte", "Sao Paulo"):,
+            ("Belo Horizonte", "Campo Grande"):,
+            ("Belo Horizonte", "Goiania"):,
+                # São Paulo
+            ("Sao Paulo", "Belo Horizonte"):,
+            ("Sao Paulo", "Rio de Janeiro"):,
+            ("Sao Paulo", "Curitiba"):,
+            ("Sao Paulo", "Campo Grande"):,
+                # Espirito Santo
+            ("Vitoria", "Salvador"):,
+            ("Vitoria", "Belo Horizonte"):,
+            ("Vitoria", "Rio de Janeiro"):,
+                # Rio de Janeiro
+            ("Rio de Janeiro", "Vitoria"):,
+            ("Rio de Janeiro", "Belo Horizonte"):,
+            ("Rio de Janeiro", "Sao Paulo"):,
+
+            # Regiao sul
+                # Parana
+            ("Curitiba", "Campo Grande"):,
+            ("Curitiba", "Sao Paulo"):,
+            ("Curitiba", "Florianópolis"):,
+                # Santa Catarina
+            ("Florianópolis", "Curitiba"):,
+            ("Florianópolis", "Porto Alegre"): 467,
+                # Rio Grande do Sul
+            ("Porto Alegre", "Florianópolis"): 467,
         }
-        
+
         for origem, destino in distancias:
             self.adicionar_aresta(origem, destino, distancias[(origem, destino)])
 
@@ -97,6 +196,7 @@ class Grafo:
                     nova_distancia = distancia_atual + valor_aresta
                     fila.append((vizinho, novo_caminho, nova_distancia))
         return None, float('inf')  # Não há caminho
+
 
 # Criando o grafo
 grafo = Grafo()
