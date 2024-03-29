@@ -65,25 +65,26 @@ rotas_encontradas = []
 
 # Função para executar o PSO e mostrar a melhor rota encontrada
 def executar_pso():
-    num_particulas = 100
+    num_particulas = 1000
     num_geracoes = 1000
     num_clientes = 4
     num_veiculos = 2
-    w = 0.5
-    c1 = 0.5
-    c2 = 0.5
+    w = 0.9
+    c1 = 1.5
+    c2 = 1.5
     distancias = [
-        [0, 10, 20, 15],  # Cliente 0
-        [10, 0, 25, 20],  # Cliente 1
-        [20, 25, 0, 10],  # Cliente 2
-        [15, 20, 10, 0],  # Cliente 3
+        [0, 5, 30, 12],  # Cliente 0
+        [6, 0, 38, 17],  # Cliente 1
+        [33, 25, 0, 39],  # Cliente 2
+        [4, 11, 29, 0],  # Cliente 3
     ]
     melhor_rota = pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2)
-    rotas_encontradas.append(melhor_rota)
+    custo_total = fitness(melhor_rota, distancias)
+    rotas_encontradas.append((melhor_rota, custo_total))
     texto_resultado.delete(1.0, END)
     texto_resultado.insert(tk.INSERT, "Rotas encontradas:\n")
-    for i, rota in enumerate(rotas_encontradas):
-        texto_resultado.insert(tk.INSERT, f"Rota {i+1}: {rota}\n")
+    for i, (rota, custo) in enumerate(rotas_encontradas):
+        texto_resultado.insert(tk.INSERT, f"Rota {i+1}: {rota} - Custo: {custo}\n")
     texto_resultado.insert(tk.INSERT, "\n")
 
 # Criar a janela principal
