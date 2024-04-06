@@ -33,31 +33,32 @@ def fitness(particula, distancias):
 
 # Algoritmo de Otimização por Enxame de Partículas (PSO)
 def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2):
+    # Inicialização das partículas e seus melhores locais
     particulas = inicializar_particulas(num_particulas, num_clientes, num_veiculos)
     melhores_locais = particulas.copy()
     fitness_melhores_locais = [fitness(particula, distancias) for particula in melhores_locais]
     melhor_global = melhores_locais[fitness_melhores_locais.index(min(fitness_melhores_locais))]
     fitness_melhor_global = min(fitness_melhores_locais)
-    velocidades = [[0]*num_clientes for _ in range(num_particulas)]
-
+    
+    # Iteração
     for _ in range(num_geracoes):
         for i, particula in enumerate(particulas):
-            for j in range(num_clientes):
-                velocidade = w*velocidades[i][j] + c1*random.random()*(melhores_locais[i][j] - particula[j]) + c2*random.random()*(melhor_global[j] - particula[j])
-                particula[j] = max(1, min(num_veiculos, particula[j] + int(velocidade)))
-            
+            # Atualização da velocidade e posição da partícula
+            for j in range(len(particula)):
+                if random.random() < c1:
+                    particula[j] = random.randint(1, num_veiculos)
+                elif random.random() < c2:
+                    particula[j] = melhores_locais[i][j]
+            # Atualização do melhor local da partícula
             if fitness(particula, distancias) < fitness_melhores_locais[i]:
                 melhores_locais[i] = particula.copy()
                 fitness_melhores_locais[i] = fitness(particula, distancias)
-                if fitness_melhores_locais[i] < fitness_melhor_global:
-                    melhor_global = particula.copy()
-                    fitness_melhor_global = fitness_melhores_locais[i]
-            elif fitness(particula, distancias) < fitness_melhor_global:
+            # Atualização do melhor global
+            if fitness_melhores_locais[i] < fitness_melhor_global:
                 melhor_global = particula.copy()
-                fitness_melhor_global = fitness(particula, distancias)
- 
+                fitness_melhor_global = fitness_melhores_locais[i]
+    
     return melhor_global
-
 
 # Lista para armazenar todas as rotas encontradas
 rotas_encontradas = []
