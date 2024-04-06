@@ -33,50 +33,65 @@ def fitness(particula, distancias):
 
 # Algoritmo de Otimização por Enxame de Partículas (PSO)
 def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2):
-    # Inicialização das partículas e seus melhores locais
     particulas = inicializar_particulas(num_particulas, num_clientes, num_veiculos)
     melhores_locais = particulas.copy()
     fitness_melhores_locais = [fitness(particula, distancias) for particula in melhores_locais]
     melhor_global = melhores_locais[fitness_melhores_locais.index(min(fitness_melhores_locais))]
     fitness_melhor_global = min(fitness_melhores_locais)
-    
-    # Iteração
+    velocidades = [[0]*num_clientes for _ in range(num_particulas)]
+
     for _ in range(num_geracoes):
         for i, particula in enumerate(particulas):
-            # Atualização da velocidade e posição da partícula
-            for j in range(len(particula)):
-                if random.random() < c1:
-                    particula[j] = random.randint(1, num_veiculos)
-                elif random.random() < c2:
-                    particula[j] = melhores_locais[i][j]
-            # Atualização do melhor local da partícula
+            for j in range(num_clientes):
+                velocidade = w*velocidades[i][j] + c1*random.random()*(melhores_locais[i][j] - particula[j]) + c2*random.random()*(melhor_global[j] - particula[j])
+                particula[j] = max(1, min(num_veiculos, particula[j] + int(velocidade)))
+            
             if fitness(particula, distancias) < fitness_melhores_locais[i]:
                 melhores_locais[i] = particula.copy()
                 fitness_melhores_locais[i] = fitness(particula, distancias)
-            # Atualização do melhor global
-            if fitness_melhores_locais[i] < fitness_melhor_global:
+                if fitness_melhores_locais[i] < fitness_melhor_global:
+                    melhor_global = particula.copy()
+                    fitness_melhor_global = fitness_melhores_locais[i]
+            elif fitness(particula, distancias) < fitness_melhor_global:
                 melhor_global = particula.copy()
-                fitness_melhor_global = fitness_melhores_locais[i]
-    
+                fitness_melhor_global = fitness(particula, distancias)
+ 
     return melhor_global
+
 
 # Lista para armazenar todas as rotas encontradas
 rotas_encontradas = []
 
 # Função para executar o PSO e mostrar a melhor rota encontrada
 def executar_pso():
-    num_particulas = 1000
+    num_particulas = 20
     num_geracoes = 1000
-    num_clientes = 4
+    num_clientes = 20
     num_veiculos = 2
     w = 0.9
     c1 = 1.5
     c2 = 1.5
     distancias = [
-        [0, 5, 30, 12],  # Cliente 0
-        [6, 0, 38, 17],  # Cliente 1
-        [33, 25, 0, 39],  # Cliente 2
-        [4, 11, 29, 0],  # Cliente 3
+        [ 0, 52, 13,  3, 31,  4, 75, 50, 29,  5, 55, 48, 14, 39, 63, 46, 68, 75, 49, 74],
+        [ 9,  0, 69, 23, 65,  2,  6,  3, 75, 69, 45, 43, 55, 73, 48, 79, 68,  7, 25, 71],
+        [72, 24,  0, 37, 47, 49, 32, 18, 79,  6,  5,  2,  8, 39, 46, 24, 68, 29, 60, 53],
+        [15, 38, 48,  0, 78, 25, 25, 69, 45, 64, 76, 73, 18, 38, 11, 50, 78,  4, 31, 19],
+        [30, 32,  3, 27,  0, 60, 34, 61, 30, 29, 65, 58, 49, 33, 31, 78, 31, 31, 74, 71],
+        [10, 13, 10, 67, 16,  0, 58, 73, 52, 42, 18, 55, 19, 63, 34, 16,  6, 11, 31, 28],
+        [26, 11, 38, 65, 43, 55,  0,  3, 68, 75,  4, 31, 76, 10, 77, 57, 18, 39, 37,  5],
+        [24, 23, 61, 68, 19, 35, 51,  0, 65, 42,  8, 50, 37, 10, 17,  4, 79, 35, 27, 74],
+        [47, 68, 45, 74, 23,  4, 21, 13,  0, 10, 50, 40, 55, 70,  1, 39, 15, 59,  2, 31],
+        [30, 40, 58, 39, 42, 64, 48,  7, 79,  0, 41, 19, 29,  8, 50, 11, 59, 40, 10, 21],
+        [52,  2, 25, 55, 45, 23, 49, 57, 49, 38,  0, 57, 38, 73, 65, 75,  6, 27, 16, 23],
+        [10,  4,  7,  3, 57, 69, 73, 38, 70, 40, 19,  0, 68, 41, 74, 29, 45, 70, 65,  3],
+        [47, 76,  3, 10, 54, 65, 74, 54, 71, 78, 66, 59,  0, 68, 78, 53, 74, 59, 65, 16],
+        [35,  2, 43, 73, 14,  1, 39,  2, 34, 38, 16, 77,  6,  0, 48, 65,  5, 48, 57, 60],
+        [41,  7, 13, 15, 61, 61,  8, 49,  5, 38, 66, 61,  3, 19,  0, 76, 38,  6, 56, 49],
+        [ 4, 51,  1, 47,  7, 10, 31, 68, 51, 40, 23,  4, 79, 79, 41,  0, 46,  1, 44, 48],
+        [77, 79, 51, 14, 41,  1, 52, 69, 37, 70, 47, 43, 68, 44, 15, 33,  0, 25, 39, 50],
+        [14,  3, 53, 58,  8, 44, 53, 46, 53, 75,  2, 44, 71, 40, 34, 46, 72,  0, 57, 19],
+        [33, 57, 54, 15, 31, 39,  3, 15, 27, 71,  2, 10, 58, 13, 53, 44, 56, 39,  0, 43],
+        [78, 27,  5, 77, 15, 48,  5,  8, 23, 61,  7, 33,  2, 34, 40, 24, 21, 26, 61,  0],
     ]
     melhor_rota = pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2)
     custo_total = fitness(melhor_rota, distancias)
