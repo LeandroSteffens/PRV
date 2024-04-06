@@ -32,7 +32,7 @@ def fitness(particula, distancias):
     return distancia_total
 
 # Algoritmo de Otimização por Enxame de Partículas (PSO)
-def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2):
+def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2, c3):
     # Inicialização das partículas e seus melhores locais
     particulas = inicializar_particulas(num_particulas, num_clientes, num_veiculos)
     melhores_locais = particulas.copy()
@@ -43,12 +43,25 @@ def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w,
     # Iteração
     for _ in range(num_geracoes):
         for i, particula in enumerate(particulas):
-            # Atualização da velocidade e posição da partícula
+            velocidade = [random.uniform(-1, 1) * w for _ in range(num_clientes)]  # Inicialização da velocidade
             for j in range(len(particula)):
-                if random.random() < c1:
+                r1 = random.random()
+                r2 = random.random()
+                r3 = random.random()
+                if r1 < c1:
                     particula[j] = random.randint(1, num_veiculos)
-                elif random.random() < c2:
+                elif r2 < c2:
                     particula[j] = melhores_locais[i][j]
+                elif r3 < c3:
+                    particula[j] = melhor_global[j]
+            # Atualização da velocidade
+            for j in range(len(particula)):
+                velocidade[j] = w * velocidade[j] + c1 * random.uniform(0, 1) * (melhores_locais[i][j] - particula[j]) + c2 * random.uniform(0, 1) * (melhor_global[j] - particula[j])
+            # Atualização da posição da partícula
+            for j in range(len(particula)):
+                particula[j] += int(velocidade[j])
+                particula[j] = max(1, min(particula[j], num_veiculos))
+                    
             # Atualização do melhor local da partícula
             if fitness(particula, distancias) < fitness_melhores_locais[i]:
                 melhores_locais[i] = particula.copy()
@@ -70,8 +83,9 @@ def executar_pso():
     num_clientes = 20
     num_veiculos = 2
     w = 0.9
-    c1 = 1.5
-    c2 = 1.5
+    c1 = 1
+    c2 = 1
+    c3 = 1
     distancias = [
         [ 0, 52, 13,  3, 31,  4, 75, 50, 29,  5, 55, 48, 14, 39, 63, 46, 68, 75, 49, 74],
         [ 9,  0, 69, 23, 65,  2,  6,  3, 75, 69, 45, 43, 55, 73, 48, 79, 68,  7, 25, 71],
@@ -94,7 +108,7 @@ def executar_pso():
         [33, 57, 54, 15, 31, 39,  3, 15, 27, 71,  2, 10, 58, 13, 53, 44, 56, 39,  0, 43],
         [78, 27,  5, 77, 15, 48,  5,  8, 23, 61,  7, 33,  2, 34, 40, 24, 21, 26, 61,  0],
     ]
-    melhor_rota = pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2)
+    melhor_rota = pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2, c3)
     custo_total = fitness(melhor_rota, distancias)
     rotas_encontradas.append((melhor_rota, custo_total))
     texto_resultado.delete(1.0, END)
