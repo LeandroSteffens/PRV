@@ -32,7 +32,7 @@ def fitness(particula, distancias):
     return distancia_total
 
 # Algoritmo de Otimização por Enxame de Partículas (PSO)
-def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2, c3):
+def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2):
     # Inicialização das partículas e seus melhores locais
     particulas = inicializar_particulas(num_particulas, num_clientes, num_veiculos)
     melhores_locais = particulas.copy()
@@ -47,12 +47,9 @@ def pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w,
             for j in range(len(particula)):
                 r1 = random.random()
                 r2 = random.random()
-                r3 = random.random()
                 if r1 < c1:
-                    particula[j] = random.randint(1, num_veiculos)
-                elif r2 < c2:
                     particula[j] = melhores_locais[i][j]
-                elif r3 < c3:
+                elif r2 < c2:
                     particula[j] = melhor_global[j]
             # Atualização da velocidade
             for j in range(len(particula)):
@@ -82,10 +79,9 @@ def executar_pso():
     num_geracoes = 1000
     num_clientes = 20
     num_veiculos = 2
-    w = 0.9
-    c1 = 1.5
-    c2 = 1.5
-    c3 = 1.5
+    w = 0.5
+    c1 = 1
+    c2 = 1
     distancias = [
         [ 0, 52, 13,  3, 31,  4, 75, 50, 29,  5, 55, 48, 14, 39, 63, 46, 68, 75, 49, 74],
         [ 9,  0, 69, 23, 65,  2,  6,  3, 75, 69, 45, 43, 55, 73, 48, 79, 68,  7, 25, 71],
@@ -108,7 +104,7 @@ def executar_pso():
         [33, 57, 54, 15, 31, 39,  3, 15, 27, 71,  2, 10, 58, 13, 53, 44, 56, 39,  0, 43],
         [78, 27,  5, 77, 15, 48,  5,  8, 23, 61,  7, 33,  2, 34, 40, 24, 21, 26, 61,  0],
     ]
-    melhor_rota = pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2, c3)
+    melhor_rota = pso(num_particulas, num_geracoes, num_clientes, num_veiculos, distancias, w, c1, c2)
     custo_total = fitness(melhor_rota, distancias)
     rotas_encontradas.append((melhor_rota, custo_total))
     texto_resultado.delete(1.0, END)
